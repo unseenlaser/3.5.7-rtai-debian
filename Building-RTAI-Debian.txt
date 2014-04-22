@@ -1,0 +1,347 @@
+BUILDING RTAI KERNEL, REALTIME and MACHINEKIT on DEBIAN 7 (Wheezy)
+------------------------------------------------------------------
+
+.Installing Debian 7 and readying it for Building on i386 PC's
+----
+----
+The best source for an installation is the debian net install CD image
+
+It is small (approx 280MB) and because the bulk of files are downloaded
+from the net, the initial installation is always completely up to date.
+
+*http://cdimage.debian.org/debian-cd/7.4.0/i386/iso-cd/debian-7.4.0-i386-netinst.iso*
+
+.Install type
+----
+There are many options available, you can choose text or graphical install
+and from there which window manager etc
+
+LXDM is a good choice for a light install
+
+Choose a kernel type to suit your machine, unless it is an old machine the 
+686-pae kernel is a safe choice
+----
+
+.Post Install
+----
+Various things need to be done to ready your system for realtime operation
+and building.
+----
+
+.Getting root and sudo access
+----
+----
+The Debian install process has a nasty habit of allowing you to create a 
+root account and set a password during install, but when you boot the install
+you cannot access root and sudo does not work
+
+This assumes you chose GRUB 2 as the boot manager.  If you chose Lilo - good luck
+
+Reboot and interrupt the grub boot, (hold down ESC if you never see it to get it up, 
+you may need to use a PS2 keyboard with older BIOS)
+and press 'e' on the boot line
+
+Go to the kernel boot line and change the end bit from 'ro quiet splash' to 'ro single'
+Then press F10 to boot or Esc will take you back to the menu without change if you think
+you have fouled up and want to start again.
+
+That will get you a root shell
+
+*passwd root*
+
+Enter new password twice
+
+*passwd -u root*
+
+then reboot
+
+From the root terminal (Accessories > Root Terminal if using LXDM)
+
+*apt-get install gedit*  (does not get installed by default)
+
+*gedit /etc/sudoers*
+
+Beneath entry for root enter
+
+*dave    ALL=(ALL:ALL) ALL*
+(assuming your user is dave)
+
+Save and close the terminal
+
+Open another one and you should be able to sudo 
+
+
+.Fetch build packages
+---- 
+----
+First fetch the following using apt from a terminal
+(This will take some considerable time)
+
+*sudo apt-get install build-essential debhelper libpth-dev libgtk2.0-dev tcl8.5-dev tk8.5-dev*
+
+*sudo apt-get install bwidget python-old-doctools python-tk python-dev libglu1-mesa-dev libgtk2.0-dev libgnomeprintui2.2-dev*
+
+*sudo apt-get install libncurses5-dev libxaw7-dev gettext libreadline-gplv2-dev lyx texlive-extra-utils imagemagick texinfo groff libmodbus-dev*
+
+*sudo apt-get install libudev-dev libmodbus-dev libboost-python-dev libboost-serialization-dev libboost-thread-dev*
+
+*sudo apt-get install libtk-img automake autoconf libtool libusb-0.1-4 libusb-1.0.0-dev git*
+
+
+This list is not exhaustive but correct at the time of writing.
+It is possible that extra packages will be required in the future or that package numbers will change.
+You will be prompted during the configure process of building MachineKit if any more are required.
+
+Sometimes it will not be until you come to run MachineKit that extra python requirements will
+become known, but that is the nature of a run-time language.
+
+.Fetching the sources for kernel and realtime
+----
+----
+In the root terminal run
+
+*cd /usr/src*
+
+*git clone https://github.com/arceye/3.5.7-rtai-debian.git sources*
+
+.Building the kernel
+----
+----
+When finished cloning
+
+*cp -R sources/RTAI RTAI*
+
+*cp -R sources/linux-3.5.7 linux-3.5.7*
+
+*ln -s linux-3.5.7 linux*
+
+*cd linux*
+
+*patch -p1 < ../sources/hal-linux-3.5.7-x86-3.patch*
+
+For a SMP (multi processor) build
+
+*cp ../sources/3.5.7-rtai-smp-config .config*
+
+Or for a UP (single processor) build
+
+*cp ../sources/3.5.7-rtai-up-config .config*
+
+*touch .config*
+
+*make*
+
+When finished (may take a long time)
+
+*make modules_install*
+
+*cp System.map /boot/System.map-3.5.7-rtai*
+
+*cp .config /boot/config-3.5.7-rtai*
+
+*cp arch/x86/boot/bzImage /boot/vmlinuz-3.5.7-rtai*
+
+*cd /boot*
+
+*update-initramfs -c -k 3.5.7-rtai*
+
+*update-grub*
+
+
+.Rebooting to the 3.5.7-rtai kernel
+----
+----
+
+You are then ready to reboot and select the 3.5.7-rtai kernel from the GRUB menu.
+
+
+.Building Realtime
+----
+----
+
+Open a root terminal
+
+*cd /usr/src/RTAI*
+
+*./autogen.sh*
+
+configure will run, but now you need to edit the default RTAI configuration
+
+*make menuconfig*
+
+    From here you need to go to Base System > Other features  [Enter] and select
+        (Y) Mathfuns support in Kernel                  
+	    (Y) C99 standard support                        
+	
+    You must configure RTAI for your specific number of processing cores
+
+		To find out how many cores your CPU has, run:
+		cat /proc/cpuinfo | grep processor | wc -l 
+		in another terminal              
+		
+		Then got Machine > Number of CPUs, [Enter] and replace figure with your number
+
+		Finally press <Exit> until out of menuconfig and say <Yes> to save config   
+
+Now configure will run again automatically    
+
+*make && make install*
+
+When finished, that is realtime installed  
+
+.Create and Edit config files for realtime / machinekit
+---- 
+----
+
+From a terminal
+
+*sudo touch /etc/udev/rules.d/50-LINUXCNC-shmdrv.rules*
+
+*sudo gedit /etc/udev/rules.d/50-LINUXCNC-shmdrv.rules*
+
+make this entry
+[source,bash]
+----
+# make the shared memory allocator publically accessible
+KERNEL=="shmdrv", MODE="0666"
+----
+
+*sudo touch /etc/udev/rules.d/99-rtai.rules*
+
+*sudo gedit /etc/udev/rules.d/99-rtai.rules*
+
+make these entries
+[source,bash]
+----
+# RTAI:rtai_shm
+KERNEL=="rtai_shm", MODE="0666"
+
+# RTAI:rtai_fifos
+KERNEL=="rtf[0-9]*", MODE="0666"
+----
+
+*sudo touch /etc/security/limits.d/linuxcnc.conf*
+
+*sudo gedit /etc/security/limits.d/linuxcnc.conf*
+
+make these entries
+[source,bash]
+----
+* soft memlock 30000000
+* hard memlock 30000000
+----
+
+.Clone MachineKit
+----
+----
+
+In a root terminal
+
+*cd /usr/src*
+
+*git clone https://github.com/machinekit/machinekit.git machinekit*
+
+When complete
+
+*chown -R yourusername:yourusername ./machinekit*
+
+Then close the root terminal and open a normal one
+
+
+.After cloning MachineKit and before building
+----
+----
+
+MachineKit uses rsyslog to log errors, making debugging in case of problems much easier.
+This needs to be enabled, if you do not do so you will get an error at the end of the build.
+
+*sudo touch /var/log/linuxcnc.log*
+
+*sudo chmod 644 /var/log/linuxcnc.log*
+
+*sudo cp /usr/src/macinekit/src/rtapi/rsyslogd-linuxcnc.conf /etc/rsyslog.d/linuxcnc.conf*
+
+*sudo chmod 644 /etc/rsyslog.d/linuxcnc.conf*
+
+*sudo /etc/init.d/rsyslog restart*
+
+.Building MachineKit
+----
+----
+
+From a user terminal
+
+*cd /usr/src/machinekit/src*
+
+*./autogen.sh*
+
+*./configure*
+
+Now scroll back and read the output to screen
+
+It should contain these lines
+
+        checking for configured kernel source in /usr/src/linux-3.5.7... found
+        checking if /usr/src/linux-3.5.7 is a xenomai kernel... no
+        checking if /usr/src/linux-3.5.7 is an RTAI kernel... yes
+        checking -lrt for RT_PREEMPT and POSIX... ok
+        checking whether to build POSIX threads... yes
+        checking whether to build RT_PREEMPT threads... yes
+        checking for xeno-config... no
+        checking usability of xenomai utility, 0... no
+        checking whether to build Xenomai userland threads... no
+        checking whether to build Xenomai kernel threads... no
+        checking for rtai-config... /usr/realtime/bin/rtai-config
+        checking usability of RTAI utility, /usr/realtime/bin/rtai-config... yes
+        checking whether to build RTAI threads... yes
+        checking whether to build hardware drivers... yes
+        
+That shows the rtai kernel is detected, the realtime config points to the right place and RTAI threads will be built
+
+*make*
+
+*sudo make setuid && cd ../ && . ./scripts/rip-environment*
+
+*linuxcnc*
+
+and you are away!
+
+
+
+===========
+(Test with asciidoctor Installing-Debian.txt to create HTML file)
+
+Author:    ArcEye
+Email:     <ArcEye@mgware.co.uk>
+Date:      12042014
+Revision:  0.1
+
+
+.Realtek RTL8111/RTL8168 ethernet
+----
+----
+
+This chip causes huge problems when used with the r8169 module which is supplied with the 3.5.7 kernel
+
+If ethernet works at all it, it is either hugely degraded in speed or intermitant and the kernel may be unstable
+
+If you have this chipset it will show up with 
+
+*lspci -vv | more*
+
+Page through the output looking for 'Ethernet Controller: Realtek ....'
+
+At the bottom of the entry is
+
+Kernel Driver in use:   xxxxx
+
+If the driver is listed as r8169, you need to replace it with the r8168 driver
+
+The r8168 has been compiled against the 3.5.7-rtai kernel and is available as a seperate package.
+
+*sudo apt-get install kmod-r8168-3.5.7-rtai*
+
+You must now re-run the ramfs image creating program to include the module
+
+*sudo update-initramfs -t -c -k 3.5.7-rtai*
+
