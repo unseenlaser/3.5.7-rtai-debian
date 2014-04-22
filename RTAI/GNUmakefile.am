@@ -1,0 +1,158 @@
+OPTDIRS =
+
+if CONFIG_RTAI_TESTSUITE
+OPTDIRS += testsuite
+endif
+
+if CONFIG_RTAI_ADDONS
+OPTDIRS += addons
+endif
+
+if CONFIG_RTAI_LAB
+OPTDIRS += rtai-lab
+endif
+
+OPTDIRS += rtai-py
+
+SUBDIRS = base $(OPTDIRS)
+
+DIST_SUBDIRS = \
+	base \
+	testsuite \
+	addons \
+	rtai-lab \
+	rtai-py
+
+EXTRA_DIST = \
+README.INSTALL \
+README.ISOLCPUS \
+README.LINUX_SERVER \
+README.LXRT_EXTS_IN_USE \
+README.SMI
+
+DISTCLEANFILES = .rtai_config .rtai_config.old .cfok .cfchanged Module.symvers configure
+
+moduledir = @RTAI_MODULE_DIR@
+
+if CONFIG_RTAI_QUIET
+MAKEFLAGS := $(MAKEFLAGS) --no-print-directory
+endif
+
+all-recursive install-recursive: base/GNUmakefile clean-if-reconfigured
+
+clean-if-reconfigured:
+	@if test -r .cfchanged ; then \
+	   rm -f .cfchanged ; \
+	   echo "****************************************" ; \
+	   echo "*  Your RTAI configuration has changed *" ; \
+	   echo "*  forcing 'make clean' ...            *" ; \
+	   echo "****************************************" ; \
+	   $(MAKE) clean ; \
+	fi
+
+CONFIG_METHODS := config nconfig menuconfig xconfig gconfig oldconfig silentoldconfig defconfig \
+	savedefconfig allnoconfig allyesconfig allmodconfig alldefconfig \
+	randconfig listnewconfig olddefconfig
+.PHONY: $(CONFIG_METHODS)
+$(CONFIG_METHODS):
+	@$(MAKE) -C base/config/kconfig \
+	-f Makefile.kconfig $@ \
+	srctree=$(PWD) ARCH=`uname -m` CONFIG_RTAI_QUIET=$(CONFIG_RTAI_QUIET)
+	@$(MAKE) --no-print-directory config-status
+
+config-status: .rtai_config
+	@test -r config.status && recf=yes || recf=no ; \
+	eval `grep ^CONFIG_RTAI_INSTALLDIR $<`; \
+	eval `grep ^CONFIG_RTAI_MAINTAINER $<`; \
+	test x$$CONFIG_RTAI_MAINTAINER_AUTOTOOLS = xy && confopts=--enable-maintainer-mode; \
+	CC="$(CC)" \
+	CXX="$(CXX)" \
+	LD="$(LD)" \
+	AR="$(AR)" \
+	RANLIB=ranlib \
+	STRIP=strip \
+	NM=nm \
+	$(srctree)./configure \
+	--build=$(build_alias) \
+	--host=$(host_alias) \
+	--with-kconfig-file=./$< \
+	--with-linux-dir=$(RTAI_LINUX_DIR) \
+	--prefix=$$CONFIG_RTAI_INSTALLDIR \
+	--enable-quiet-build=@CONFIG_RTAI_QUIET@ \
+	$$confopts ; \
+	if test $$? = 0; then \
+	   touch .cfok ; \
+	   if test x$$recf = xyes ; then \
+	      touch .cfchanged ; \
+	   fi ; \
+	else \
+	   rm -f .cfok ; false; \
+	fi
+
+if CONFIG_RTAI_OLD_FASHIONED_BUILD
+clean-local:
+	rm -fr modules .cfchanged
+
+distclean-local:
+	$(MAKE) -C $(srcdir)/base/config/kconfig \
+	-f Makefile.kconfig distclean srctree=$(srcdir)
+	find . -name autom4te.cache | xargs rm -fr
+else
+clean-local:
+	rm -f .cfchanged
+
+distclean-local:
+	test -d $(top_builddir)/base/config && \
+	$(MAKE) -C $(top_builddir)/base/config/kconfig \
+	-f @abs_srcdir@/base/config/kconfig/Makefile.kconfig distclean srctree=@abs_srcdir@
+endif
+
+install-data-local: .rtai_config
+	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
+	$(INSTALL_DATA) .rtai_config $(DESTDIR)$(pkgdatadir)/config-rtai-$(VERSION)
+	if test -f Module.symvers ; then \
+	    $(INSTALL_DATA) Module.symvers $(DESTDIR)$(moduledir)/Module.symvers ; \
+	fi
+
+install-exec-local: devices
+
+dist-hook:
+	$(MAKE) -C $(distdir)/base/config/kconfig \
+	-f Makefile.kconfig distclean srctree=$(distdir)
+	rm -fr `find $(distdir) -name CVS`
+	test -e $(srcdir)/doc || rm -fr $(distdir)/doc
+
+dev devices:
+	@if test -r $(DESTDIR)/etc/udev/udev.rules ; then \
+	    for f in \
+		    $(srcdir)/base/ipc/shm/rtai_shm.udev \
+		    $(srcdir)/base/ipc/fifos/rtai_fifos.udev \
+		    ; do \
+		b=`basename $$f` ; \
+		grep -q RTAI:`basename $$b .udev` $(DESTDIR)/etc/udev/udev.rules || \
+		$$sudo sh -c "( echo ; cat $$f ) >> $(DESTDIR)/etc/udev/udev.rules" ; \
+	    done ; \
+	elif test -d $(DESTDIR)/etc/udev/rules.d ; then \
+	    for f in \
+		    $(srcdir)/base/ipc/shm/rtai_shm.udev \
+		    $(srcdir)/base/ipc/fifos/rtai_fifos.udev \
+		    ; do \
+		b=`basename $$f` ; \
+		grep -q RTAI:`basename $$b .udev` $(DESTDIR)/etc/udev/rules.d/99-rtai.rules || \
+		$$sudo sh -c "( echo ; cat $$f ) >> $(DESTDIR)/etc/udev/rules.d/99-rtai.rules" ; \
+	    done ; \
+	fi ; \
+	if test x$(DESTDIR) = x; then \
+	    if test \! "x`type -t sudo`" = x; then sudo=sudo; else sudo=; fi; \
+	    if test \! -c $(DESTDIR)/dev/rtai_shm; then \
+	       $$sudo mknod -m 666 $(DESTDIR)/dev/rtai_shm c 10 254; \
+	    fi; \
+	    for n in `seq 0 9`; do \
+	       f="$(DESTDIR)/dev/rtf$$n"; \
+	       if test \! -c $$f; then \
+		  $$sudo mknod -m 666 $$f c 150 $$n; \
+	       fi; \
+	    done ; \
+	fi
+
+.PHONY: clean-if-reconfigured dev devices

@@ -1,0 +1,40 @@
+RTAI-Lab Installation
+=====================
+
+- Compile and install the Mesa library
+
+1)  Download Mesa:
+
+http://cgit.freedesktop.org/mesa/mesa/snapshot/mesa-8.0.5.tar.gz
+
+2)  Untar the archive:
+
+tar zxf mesa-8.0.5.tar.gz
+
+3)  cd mesa-8.0.5
+
+4)  ./configure --prefix=/usr --enable-static
+
+5)  make
+
+6)  make install
+
+- Compile and install the EFLTK package
+
+7)  Download EFLTK:
+
+sourceforge.net/projects/ede/files/efltk/2.0.8/efltk-2.0.8.tar.gz
+
+8)  cd efltk
+
+9)  ./configure --prefix=/usr/local --enable-xdbe --enable-opengl --enable-threads
+
+10) ./emake
+
+11) Install as superuser or root:
+
+make install
+
+12) Run ldconfig as superuser or root:
+
+ldconfig

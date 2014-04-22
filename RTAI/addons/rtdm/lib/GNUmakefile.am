@@ -1,0 +1,18 @@
+lib_LTLIBRARIES = librtdm.la
+
+librtdm_la_LDFLAGS = -module -version-info 0:0:0
+
+librtdm_la_SOURCES = \
+	services.c
+
+AM_CPPFLAGS = \
+	@RTAI_USER_CFLAGS@ \
+	-fno-inline \
+	-I../../../base/include \
+	-I$(top_srcdir)/base/include \
+	-I$(top_srcdir)/addons \
+	-I$(srcdir)/../..
+
+if CONFIG_RTAI_DRIVERS_16550A
+AM_CPPFLAGS += -I$(top_srcdir)/addons/drivers/16550A
+endif
