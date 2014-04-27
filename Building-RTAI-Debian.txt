@@ -269,7 +269,19 @@ This needs to be enabled, if you do not do so you will get an error at the end o
 ----
 ----
 
+The later kernel based distros, Debian 7 and Ubuntu 12.04 included, changed the set up inside /usr/include
+
+This will prevent Machinekit building unless you make a few changes
+
 From a user terminal
+
+*cd /usr/include/i386-linux-gnu*
+
+*sudo ln -s asm ../asm && sudo ln -s bits ../bits && sudo ln -s gnu ../gnu && sudo ln -s sys ../sys*
+
+*sudo ln -s a.out.h ../a.out.h && sudo ln -s fpu_control.h ../fpu_control.h && sudo ln -s ieee754.h ../ieee754.h*
+
+Now we are ready to build
 
 *cd /usr/src/machinekit/src*
 
@@ -298,30 +310,28 @@ It should contain these lines
         
 That shows the rtai kernel is detected, the realtime config points to the right place and RTAI threads will be built
 
+Now the final build commands
+
 *make*
 
 *sudo make setuid && cd ../ && . ./scripts/rip-environment*
+
+It's not called machinekit yet, so
 
 *linuxcnc*
 
 and you are away!
 
 
-
-===========
-(Test with asciidoctor Installing-Debian.txt to create HTML file)
-
-Author:    ArcEye
-Email:     <ArcEye@mgware.co.uk>
-Date:      12042014
-Revision:  0.1
-
+.Additional Notes
+----
+----
 
 .Realtek RTL8111/RTL8168 ethernet
 ----
 ----
 
-This chip causes huge problems when used with the r8169 module which is supplied with the 3.5.7 kernel
+Some versions of this chip can cause huge problems when used with the r8169 module which is supplied with the 3.5.7 kernel
 
 If ethernet works at all it, it is either hugely degraded in speed or intermitant and the kernel may be unstable
 
@@ -337,11 +347,22 @@ Kernel Driver in use:   xxxxx
 
 If the driver is listed as r8169, you need to replace it with the r8168 driver
 
-The r8168 has been compiled against the 3.5.7-rtai kernel and is available as a seperate package.
+There is a directory called r8168-8.035.00 in the cloned git repo you made at /usr/src/sources
 
-*sudo apt-get install kmod-r8168-3.5.7-rtai*
+That contains a README file with instructions to build the driver, blacklist r8169 and insert the module and log it with depmod
 
-You must now re-run the ramfs image creating program to include the module
+It is vitally important that you must now re-run the ramfs image creating program to include the module
 
 *sudo update-initramfs -t -c -k 3.5.7-rtai*
+
+and then re-boot into the 3.5.7-rtai kernel before anything will take effect
+
+===========
+
+Author:    ArcEye
+Email:     <ArcEye@mgware.co.uk>
+Date:      12042014
+Revision:  0.1
+
+
 

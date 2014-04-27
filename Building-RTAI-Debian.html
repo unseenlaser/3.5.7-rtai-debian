@@ -510,7 +510,7 @@ become known, but that is the nature of a run-time language.</p>
 <p><strong>cd /usr/src</strong></p>
 </div>
 <div class="paragraph">
-<p><strong>git clone <a href="https://github.com/arceye/3.5.7-rtai-smp-debian.git">https://github.com/arceye/3.5.7-rtai-smp-debian.git</a> sources</strong></p>
+<p><strong>git clone <a href="https://github.com/arceye/3.5.7-rtai-debian.git">https://github.com/arceye/3.5.7-rtai-debian.git</a> sources</strong></p>
 </div>
 <div class="listingblock">
 <div class="title">Building the kernel</div>
@@ -537,16 +537,22 @@ become known, but that is the nature of a run-time language.</p>
 <p><strong>patch -p1 &lt; ../sources/hal-linux-3.5.7-x86-3.patch</strong></p>
 </div>
 <div class="paragraph">
-<p><strong>cp ../sources/3.5.7-rtai-config .config</strong></p>
+<p>For a SMP (multi processor) build</p>
+</div>
+<div class="paragraph">
+<p><strong>cp ../sources/3.5.7-rtai-smp-config .config</strong></p>
+</div>
+<div class="paragraph">
+<p>Or for a UP (single processor) build</p>
+</div>
+<div class="paragraph">
+<p><strong>cp ../sources/3.5.7-rtai-up-config .config</strong></p>
 </div>
 <div class="paragraph">
 <p><strong>touch .config</strong></p>
 </div>
 <div class="paragraph">
-<p>Substituting the X with the number of processors/cores you have + 1</p>
-</div>
-<div class="paragraph">
-<p><strong>make -jX</strong></p>
+<p><strong>make</strong></p>
 </div>
 <div class="paragraph">
 <p>When finished (may take a long time)</p>
@@ -753,7 +759,25 @@ This needs to be enabled, if you do not do so you will get an error at the end o
 </div>
 </div>
 <div class="paragraph">
+<p>The later kernel based distros, Debian 7 and Ubuntu 12.04 included, changed the set up inside /usr/include</p>
+</div>
+<div class="paragraph">
+<p>This will prevent Machinekit building unless you make a few changes</p>
+</div>
+<div class="paragraph">
 <p>From a user terminal</p>
+</div>
+<div class="paragraph">
+<p><strong>cd /usr/include/i386-linux-gnu</strong></p>
+</div>
+<div class="paragraph">
+<p><strong>sudo ln -s asm ../asm &amp;&amp; sudo ln -s bits ../bits &amp;&amp; sudo ln -s gnu ../gnu &amp;&amp; sudo ln -s sys ../sys</strong></p>
+</div>
+<div class="paragraph">
+<p><strong>sudo ln -s a.out.h ../a.out.h &amp;&amp; sudo ln -s fpu_control.h ../fpu_control.h &amp;&amp; sudo ln -s ieee754.h ../ieee754.h</strong></p>
+</div>
+<div class="paragraph">
+<p>Now we are ready to build</p>
 </div>
 <div class="paragraph">
 <p><strong>cd /usr/src/machinekit/src</strong></p>
@@ -792,10 +816,16 @@ checking whether to build hardware drivers... yes</pre>
 <p>That shows the rtai kernel is detected, the realtime config points to the right place and RTAI threads will be built</p>
 </div>
 <div class="paragraph">
+<p>Now the final build commands</p>
+</div>
+<div class="paragraph">
 <p><strong>make</strong></p>
 </div>
 <div class="paragraph">
 <p><strong>sudo make setuid &amp;&amp; cd ../ &amp;&amp; . ./scripts/rip-environment</strong></p>
+</div>
+<div class="paragraph">
+<p>It&#8217;s not called machinekit yet, so</p>
 </div>
 <div class="paragraph">
 <p><strong>linuxcnc</strong></p>
@@ -803,16 +833,11 @@ checking whether to build hardware drivers... yes</pre>
 <div class="paragraph">
 <p>and you are away!</p>
 </div>
-<div class="exampleblock">
+<div class="listingblock">
+<div class="title">Additional Notes</div>
 <div class="content">
-<div class="paragraph">
-<p>(Test with asciidoctor Installing-Debian.txt to create HTML file)</p>
+<pre></pre>
 </div>
-<div class="paragraph">
-<p>Author:    ArcEye
-Email:     &lt;<a href="mailto:ArcEye@mgware.co.uk">ArcEye@mgware.co.uk</a>&gt;
-Date:      12042014
-Revision:  0.1</p>
 </div>
 <div class="listingblock">
 <div class="title">Realtek RTL8111/RTL8168 ethernet</div>
@@ -821,7 +846,7 @@ Revision:  0.1</p>
 </div>
 </div>
 <div class="paragraph">
-<p>This chip causes huge problems when used with the r8169 module which is supplied with the 3.5.7 kernel</p>
+<p>Some versions of this chip can cause huge problems when used with the r8169 module which is supplied with the 3.5.7 kernel</p>
 </div>
 <div class="paragraph">
 <p>If ethernet works at all it, it is either hugely degraded in speed or intermitant and the kernel may be unstable</p>
@@ -845,16 +870,27 @@ Revision:  0.1</p>
 <p>If the driver is listed as r8169, you need to replace it with the r8168 driver</p>
 </div>
 <div class="paragraph">
-<p>The r8168 has been compiled against the 3.5.7-rtai kernel and is available as a seperate package.</p>
+<p>There is a directory called r8168-8.035.00 in the cloned git repo you made at /usr/src/sources</p>
 </div>
 <div class="paragraph">
-<p><strong>sudo apt-get install kmod-r8168-3.5.7-rtai</strong></p>
+<p>That contains a README file with instructions to build the driver, blacklist r8169 and insert the module and log it with depmod</p>
 </div>
 <div class="paragraph">
-<p>You must now re-run the ramfs image creating program to include the module</p>
+<p>It is vitally important that you must now re-run the ramfs image creating program to include the module</p>
 </div>
 <div class="paragraph">
 <p><strong>sudo update-initramfs -t -c -k 3.5.7-rtai</strong></p>
+</div>
+<div class="paragraph">
+<p>and then re-boot into the 3.5.7-rtai kernel before anything will take effect</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Author:    ArcEye
+Email:     &lt;<a href="mailto:ArcEye@mgware.co.uk">ArcEye@mgware.co.uk</a>&gt;
+Date:      12042014
+Revision:  0.1</p>
 </div>
 </div>
 </div>
@@ -863,7 +899,7 @@ Revision:  0.1</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-04-20 14:24:12 GMT
+Last updated 2014-04-27 10:38:23 BST
 </div>
 </div>
 </body>
