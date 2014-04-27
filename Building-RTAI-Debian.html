@@ -414,6 +414,16 @@ root account and set a password during install, but when you boot the install
 you cannot access root and sudo does not work</p>
 </div>
 <div class="paragraph">
+<p>This often seems to result from allowing the installer to set time from
+internet and when you come to complete the install it hangs half way trying to
+resolve the time and never creates the root account properly.
+I don&#8217;t let it set the time like this and just choose time zone and adjust for
+summertime etc myself later.</p>
+</div>
+<div class="paragraph">
+<p>If this affects you, the below will enable you to get root access and sudo as a user.</p>
+</div>
+<div class="paragraph">
 <p>This assumes you chose GRUB 2 as the boot manager.  If you chose Lilo - good luck</p>
 </div>
 <div class="paragraph">
@@ -899,7 +909,7 @@ Revision:  0.1</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-04-27 10:38:23 BST
+Last updated 2014-04-27 11:02:50 BST
 </div>
 </div>
 </body>

@@ -35,6 +35,14 @@ The Debian install process has a nasty habit of allowing you to create a
 root account and set a password during install, but when you boot the install
 you cannot access root and sudo does not work
 
+This often seems to result from allowing the installer to set time from
+internet and when you come to complete the install it hangs half way trying to
+resolve the time and never creates the root account properly.
+I don't let it set the time like this and just choose time zone and adjust for
+summertime etc myself later.
+
+If this affects you, the below will enable you to get root access and sudo as a user.
+
 This assumes you chose GRUB 2 as the boot manager.  If you chose Lilo - good luck
 
 Reboot and interrupt the grub boot, (hold down ESC if you never see it to get it up, 
