@@ -562,7 +562,34 @@ become known, but that is the nature of a run-time language.</p>
 <p><strong>touch .config</strong></p>
 </div>
 <div class="paragraph">
-<p><strong>make</strong></p>
+<p>At this point you could make changes to the config with <strong>make menuconfig</strong></p>
+</div>
+<div class="paragraph">
+<p>Do so at your own risk, setting the correct number of cores is probably the most you want to do
+if it is more than 4 (SMP config only)</p>
+</div>
+<div class="paragraph">
+<p>If you start changing the processor instruction set or turning back on ACPI functions in particular
+you could end up with a kernel that does not run at all, or does not run realtime apps.</p>
+</div>
+<div class="paragraph">
+<p>To turn on the production of a driver module you require for your machine, it is often easier to
+search the config file in an editor</p>
+</div>
+<div class="paragraph">
+<p><strong>DRIVER_NAME=y</strong>  means it will be built into the kernel</p>
+</div>
+<div class="paragraph">
+<p><strong>DRIVER_NAME=m</strong>  means it will be built as a module</p>
+</div>
+<div class="paragraph">
+<p>Now build the kernel</p>
+</div>
+<div class="paragraph">
+<p><strong>make -jX</strong>  (where X is the number of cores + 1 on a multi-core machine, or just)</p>
+</div>
+<div class="paragraph">
+<p><strong>make</strong> (on a UP machine)</p>
 </div>
 <div class="paragraph">
 <p>When finished (may take a long time)</p>
@@ -909,7 +936,7 @@ Revision:  0.1</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-04-27 11:02:50 BST
+Last updated 2014-04-28 14:52:49 BST
 </div>
 </div>
 </body>

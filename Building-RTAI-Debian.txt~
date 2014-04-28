@@ -148,15 +148,15 @@ you could end up with a kernel that does not run at all, or does not run realtim
 To turn on the production of a driver module you require for your machine, it is often easier to
 search the config file in an editor
 
-*DRIVER_NAME=y*  means it will be built into the kernel
+DRIVER_NAME=y  means it will be built into the kernel
 
-*DRIVER_NAME=m*  means it will be built as a module
+DRIVER_NAME=m  means it will be built as a module
 
 Now build the kernel
  
-*make -jX*  (where X is the number of cores + 1 on a multi-core machine, or just)
+*make -jX*  where X is the number of cores + 1 on a multi-core machine, or just
 
-*make* (on a UP machine)
+*make* on a UP machine
 
 When finished (may take a long time)
 
