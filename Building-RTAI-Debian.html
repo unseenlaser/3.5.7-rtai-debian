@@ -367,6 +367,79 @@ span.icon > [class^="icon-"], span.icon > [class*=" icon-"] { cursor: default; }
 <div class="sect1">
 <h2 id="_building_rtai_kernel_realtime_and_machinekit_on_debian_7_wheezy">BUILDING RTAI KERNEL, REALTIME and MACHINEKIT on DEBIAN 7 (Wheezy)</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>This guide is for those who wish to experiment with their own kernel
+and realtime builds</p>
+</div>
+<div class="paragraph">
+<p>The config has been tested sucessfully on D525 Intel Atom, Intel P4,
+Intel Celeron B630 and Intel core i2</p>
+</div>
+<div class="paragraph">
+<p>It does not however run Machinekit on a new Intel core i7,
+albeit the kernel runs and everything builds, so it may not be suitable
+for some newer Sandy Bridge chipset and later based boards</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>************************</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There is no need to do this to get a realtime kernel that works on Debian</p>
+</div>
+<div class="paragraph">
+<p>Simply go to <a href="http://highlab.com/~seb/linuxcnc/rtai-for-3.4-prerelease/">http://highlab.com/~seb/linuxcnc/rtai-for-3.4-prerelease/</a></p>
+</div>
+<div class="paragraph">
+<p>Download</p>
+</div>
+<div class="paragraph">
+<p><strong>linux-headers-3.4.55-rtai-2_3_i386.deb</strong></p>
+</div>
+<div class="paragraph">
+<p><strong>linux-image-3.4.55-rtai-2_3_i386.deb</strong></p>
+</div>
+<div class="paragraph">
+<p><strong>rtai-modules-3.4.55-rtai-2_3.9-shabby-memleak-2013.12.13_i386.deb</strong></p>
+</div>
+<div class="paragraph">
+<p>Install them with <strong>dpkg -i &lt;debname&gt;</strong></p>
+</div>
+<div class="paragraph">
+<p>Run <strong>update-grub</strong> and re-boot into the kernel and build MachineKit
+(instructions below if required)</p>
+</div>
+<div class="paragraph">
+<p>I have tested this and it works fine</p>
+</div>
+<div class="paragraph">
+<p>The only isssue is that you need to sort out some symlinks</p>
+</div>
+<div class="paragraph">
+<p>Install the headers first and then make a symlink to them in <strong>/usr/src</strong> called <strong>linux</strong></p>
+</div>
+<div class="paragraph">
+<p>Install the kernel image and you will see errors from postinst regards the modules
+symlinks</p>
+</div>
+<div class="paragraph">
+<p>Create two symlinks from <strong>/usr/src/linux</strong> to <strong>/lib/modules/3.4.55-rtai-2/build</strong> and <strong>/lib/modules/3.4.55-rtai-2/source</strong></p>
+</div>
+<div class="paragraph">
+<p>Now install realtime</p>
+</div>
+<div class="paragraph">
+<p>Now the path in /realtime-xxxxx/bin/rtai-config for the linux sources will be correct</p>
+</div>
+<div class="paragraph">
+<p>If you don&#8217;t do this the MachineKit build will fail to build any rtai modules and fail when run</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>***************************</pre>
+</div>
+</div>
 <div class="listingblock">
 <div class="title">Installing Debian 7 and readying it for Building on i386 PC&#8217;s</div>
 <div class="content">
@@ -424,7 +497,7 @@ I don&#8217;t let it set the time like this and just choose time zone and adjust
 summertime etc myself later.</p>
 </div>
 <div class="paragraph">
-<p>If this affects you, the below will enable you to get root access and sudo as a user.</p>
+<p>If this affects you, the below will enable you to get root a	rtai-modules-3.4.55-rtai-2_3.9-shabby-memleak-2013.12.13_i386.debccess and sudo as a user.</p>
 </div>
 <div class="paragraph">
 <p>This assumes you chose GRUB 2 as the boot manager.  If you chose Lilo - good luck</p>
@@ -937,7 +1010,7 @@ Revision:  0.1</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-04-30 13:12:38 BST
+Last updated 2014-04-30 16:12:31 BST
 </div>
 </div>
 </body>

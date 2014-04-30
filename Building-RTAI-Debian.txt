@@ -1,6 +1,56 @@
 BUILDING RTAI KERNEL, REALTIME and MACHINEKIT on DEBIAN 7 (Wheezy)
 ------------------------------------------------------------------
 
+This guide is for those who wish to experiment with their own kernel
+and realtime builds
+
+The config has been tested sucessfully on D525 Intel Atom, Intel P4,
+Intel Celeron B630 and Intel core i2
+
+It does not however run Machinekit on a new Intel core i7, 
+albeit the kernel runs and everything builds, so it may not be suitable
+for some newer Sandy Bridge chipset and later based boards
+
+                    ************************
+
+There is no need to do this to get a realtime kernel that works on Debian
+
+Simply go to http://highlab.com/~seb/linuxcnc/rtai-for-3.4-prerelease/
+
+Download
+
+*linux-headers-3.4.55-rtai-2_3_i386.deb*
+
+*linux-image-3.4.55-rtai-2_3_i386.deb*
+
+*rtai-modules-3.4.55-rtai-2_3.9-shabby-memleak-2013.12.13_i386.deb*
+
+Install them with *dpkg -i <debname>*
+
+Run *update-grub* and re-boot into the kernel and build MachineKit 
+(instructions below if required)
+
+I have tested this and it works fine
+
+The only isssue is that you need to sort out some symlinks
+
+Install the headers first and then make a symlink to them in */usr/src* called *linux*
+
+Install the kernel image and you will see errors from postinst regards the modules
+symlinks
+
+Create two symlinks from */usr/src/linux* to */lib/modules/3.4.55-rtai-2/build* and */lib/modules/3.4.55-rtai-2/source*
+
+Now install realtime
+
+Now the path in /realtime-xxxxx/bin/rtai-config for the linux sources will be correct
+
+If you don't do this the MachineKit build will fail to build any rtai modules and fail when run
+
+
+                  ***************************
+
+
 .Installing Debian 7 and readying it for Building on i386 PC's
 ----
 ----
@@ -44,7 +94,7 @@ resolve the time and never creates the root account properly.
 I don't let it set the time like this and just choose time zone and adjust for
 summertime etc myself later.
 
-If this affects you, the below will enable you to get root access and sudo as a user.
+If this affects you, the below will enable you to get root a	rtai-modules-3.4.55-rtai-2_3.9-shabby-memleak-2013.12.13_i386.debccess and sudo as a user.
 
 This assumes you chose GRUB 2 as the boot manager.  If you chose Lilo - good luck
 
