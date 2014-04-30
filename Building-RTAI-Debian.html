@@ -381,7 +381,10 @@ span.icon > [class^="icon-"], span.icon > [class*=" icon-"] { cursor: default; }
 from the net, the initial installation is always completely up to date.</p>
 </div>
 <div class="paragraph">
-<p><strong><a href="http://cdimage.debian.org/debian-cd/7.4.0/i386/iso-cd/debian-7.4.0-i386-netinst.iso">http://cdimage.debian.org/debian-cd/7.4.0/i386/iso-cd/debian-7.4.0-i386-netinst.iso</a></strong></p>
+<p><strong><a href="http://cdimage.debian.org/debian-cd/">http://cdimage.debian.org/debian-cd/</a></strong></p>
+</div>
+<div class="paragraph">
+<p>Then choose whatever the current version of 7 is (currently 7.5)</p>
 </div>
 <div class="listingblock">
 <div class="title">Install type</div>
@@ -802,16 +805,14 @@ This needs to be enabled, if you do not do so you will get an error at the end o
 <p>This will prevent Machinekit building unless you make a few changes</p>
 </div>
 <div class="paragraph">
-<p>From a user terminal</p>
+<p>From a file manager go to /usr/include/i386-linux-gnu</p>
 </div>
 <div class="paragraph">
-<p><strong>cd /usr/include/i386-linux-gnu</strong></p>
+<p>Now copy all the folders and loose header back to the root dir
+ie.</p>
 </div>
 <div class="paragraph">
-<p><strong>sudo ln -s asm ../asm &amp;&amp; sudo ln -s bits ../bits &amp;&amp; sudo ln -s gnu ../gnu &amp;&amp; sudo ln -s sys ../sys</strong></p>
-</div>
-<div class="paragraph">
-<p><strong>sudo ln -s a.out.h ../a.out.h &amp;&amp; sudo ln -s fpu_control.h ../fpu_control.h &amp;&amp; sudo ln -s ieee754.h ../ieee754.h</strong></p>
+<p><strong>/asm /bits /gnu /sys a.out.h fpu_control.h ieee754.h</strong></p>
 </div>
 <div class="paragraph">
 <p>Now we are ready to build</p>
@@ -936,7 +937,7 @@ Revision:  0.1</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-04-28 14:52:49 BST
+Last updated 2014-04-30 13:12:38 BST
 </div>
 </div>
 </body>

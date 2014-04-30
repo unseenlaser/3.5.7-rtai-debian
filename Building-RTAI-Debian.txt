@@ -9,7 +9,10 @@ The best source for an installation is the debian net install CD image
 It is small (approx 280MB) and because the bulk of files are downloaded
 from the net, the initial installation is always completely up to date.
 
-*http://cdimage.debian.org/debian-cd/7.4.0/i386/iso-cd/debian-7.4.0-i386-netinst.iso*
+*http://cdimage.debian.org/debian-cd/*
+
+Then choose whatever the current version of 7 is (currently 7.5)
+
 
 .Install type
 ----
@@ -300,13 +303,12 @@ The later kernel based distros, Debian 7 and Ubuntu 12.04 included, changed the 
 
 This will prevent Machinekit building unless you make a few changes
 
-From a user terminal
+From a file manager go to /usr/include/i386-linux-gnu
 
-*cd /usr/include/i386-linux-gnu*
+Now copy all the folders and loose header back to the root dir
+ie.
 
-*sudo ln -s asm ../asm && sudo ln -s bits ../bits && sudo ln -s gnu ../gnu && sudo ln -s sys ../sys*
-
-*sudo ln -s a.out.h ../a.out.h && sudo ln -s fpu_control.h ../fpu_control.h && sudo ln -s ieee754.h ../ieee754.h*
+*/asm /bits /gnu /sys a.out.h fpu_control.h ieee754.h*
 
 Now we are ready to build
 
